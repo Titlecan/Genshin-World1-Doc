@@ -20,11 +20,14 @@
             position: relative;
         }
         .container {
+            width: 100%;
             max-width: 800px;
             margin: auto;
             padding: 20px;
-            background-color: rgba(255, 255, 255, 0.8);
+            background-color: rgba(255, 255, 255, 0.7);
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 2;
         }
         h1 {
             color: #0078d4;
@@ -39,10 +42,20 @@
             width: 100%;
             margin-bottom: 20px;
         }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
     </style>
 </head>
 <body>
     <div class="bg">
+        <canvas id="canvas"></canvas>
         <div class="container">
             <h1>Titlecan的原神记录页面</h1>
             <p>文章待写</p>
@@ -53,5 +66,76 @@
             </audio>
         </div>
     </div>
+
+    <script>
+        var canvas = document.getElementById("canvas");
+        var ctx = canvas.getContext("2d");
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        var particlesArray;
+
+        function Particle(x, y, directionX, directionY, size, color) {
+            this.x = x;
+            this.y = y;
+            this.directionX = directionX;
+            this.directionY = directionY;
+            this.size = size;
+            this.color = color;
+        }
+
+        Particle.prototype.draw = function() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+        }
+
+        Particle.prototype.update = function() {
+            if (this.x > canvas.width || this.x < 0) {
+                this.directionX = -this.directionX;
+            }
+            if (this.y > canvas.height || this.y < 0) {
+                this.directionY = -this.directionY;
+            }
+            this.x += this.directionX;
+            this.y += this.directionY;
+            this.draw();
+        }
+
+        function init() {
+            particlesArray = [];
+            for (var i = 0; i < 100; i++) {
+                var size = Math.random() * 5;
+                var x = Math.random() * (innerWidth - size * 2);
+                var y = Math.random() * (innerHeight - size * 2);
+
+                var directionX = (Math.random() * 0.4) - 0.2;
+                var directionY = (Math.random() * 0.4) - 0.2;
+                var color = 'rgba(255, 255, 255, 0.5)';
+
+                particlesArray.push(new Particle(x, y, directionX, directionY, size, color));
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            ctx.clearRect(0, 0, innerWidth, innerHeight);
+
+            for (var i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+            }
+        }
+
+        window.addEventListener('resize', function() {
+            canvas.width = innerWidth;
+            canvas.height = innerHeight;
+            init();
+        });
+
+        init();
+        animate();
+    </script>
 </body>
 </html>
