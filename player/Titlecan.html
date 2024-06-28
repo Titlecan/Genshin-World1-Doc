@@ -33,10 +33,31 @@
             color: #0078d4;
             margin-bottom: 20px;
         }
-        img.center-img {
-            display: block;
+        .carousel {
+            display: flex;
+            overflow: hidden;
             margin: 20px auto;
+            max-width: 300px; /* 设置轮播图的最大宽度 */
+            position: relative;
+        }
+        .carousel img {
             max-width: 100%;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+        .carousel-control {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 24px;
+            color: #0078d4;
+        }
+        .carousel-control.left {
+            left: 0;
+        }
+        .carousel-control.right {
+            right: 0;
         }
         audio {
             width: 100%;
@@ -59,7 +80,14 @@
         <div class="container">
             <h1>Titlecan的原神记录页面</h1>
             <p>文章待写</p>
-            <img class="center-img" src="https://img.picui.cn/free/2024/06/24/66784e5aa945c.jpg" alt="内容图片">
+            <!-- 轮播图容器 -->
+            <div class="carousel">
+                <img src="https://img.picui.cn/free/2024/06/24/66784e5aa945c.jpg" alt="米游社">
+                <img src="https://img.picui.cn/free/2024/06/28/667e1f5466e1b.jpg" alt="原神">
+                <!-- 手动切换按钮 -->
+                <div class="carousel-control left">&lt;</div>
+                <div class="carousel-control right">&gt;</div>
+            </div>
             <audio controls>
                 <source src="https://blog.titlecan.ru/usr/uploads/2024/05/483988058.mp3" type="audio/mpeg">
                 您的浏览器不支持音频元素。
@@ -67,75 +95,32 @@
         </div>
     </div>
 
+    <script src="https://cdn.titlecan.cn/js/xuehua.js"></script>
     <script>
-        var canvas = document.getElementById("canvas");
-        var ctx = canvas.getContext("2d");
+        // JavaScript代码实现自动轮播和手动切换
+        const carousel = document.querySelector('.carousel');
+        let index = 0; // 当前显示的图片索引
+        const images = document.querySelectorAll('.carousel img');
+        const totalImages = images.length;
+        const intervalTime = 5000; // 轮播间隔时间设置为5秒
 
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        var particlesArray;
-
-        function Particle(x, y, directionX, directionY, size, color) {
-            this.x = x;
-            this.y = y;
-            this.directionX = directionX;
-            this.directionY = directionY;
-            this.size = size;
-            this.color = color;
+        function nextImage(step = 1) {
+            index = (index + step + totalImages) % totalImages; // 更新索引，实现循环
+            updateCarousel();
         }
 
-        Particle.prototype.draw = function() {
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
-            ctx.fillStyle = this.color;
-            ctx.fill();
+        function updateCarousel() {
+            images.forEach((img, i) => {
+                img.style.transform = `translateX(-${index * 100}%)`;
+            });
         }
 
-        Particle.prototype.update = function() {
-            if (this.x > canvas.width || this.x < 0) {
-                this.directionX = -this.directionX;
-            }
-            if (this.y > canvas.height || this.y < 0) {
-                this.directionY = -this.directionY;
-            }
-            this.x += this.directionX;
-            this.y += this.directionY;
-            this.draw();
-        }
+        // 设置自动轮播
+        setInterval(() => nextImage(), intervalTime);
 
-        function init() {
-            particlesArray = [];
-            for (var i = 0; i < 100; i++) {
-                var size = Math.random() * 5;
-                var x = Math.random() * (innerWidth - size * 2);
-                var y = Math.random() * (innerHeight - size * 2);
-
-                var directionX = (Math.random() * 0.4) - 0.2;
-                var directionY = (Math.random() * 0.4) - 0.2;
-                var color = 'rgba(255, 255, 255, 0.5)';
-
-                particlesArray.push(new Particle(x, y, directionX, directionY, size, color));
-            }
-        }
-
-        function animate() {
-            requestAnimationFrame(animate);
-            ctx.clearRect(0, 0, innerWidth, innerHeight);
-
-            for (var i = 0; i < particlesArray.length; i++) {
-                particlesArray[i].update();
-            }
-        }
-
-        window.addEventListener('resize', function() {
-            canvas.width = innerWidth;
-            canvas.height = innerHeight;
-            init();
-        });
-
-        init();
-        animate();
+        // 添加手动切换事件监听器
+        document.querySelector('.carousel-control.left').addEventListener('click', () => nextImage(-1));
+        document.querySelector('.carousel-control.right').addEventListener('click', () => nextImage(1));
     </script>
 </body>
 </html>
